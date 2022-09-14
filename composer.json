@@ -1,0 +1,46 @@
+{
+    "name": "octany/octany-php",
+    "description": "Octany PHP SDK",
+    "keywords": [
+        "octany",
+        "laravel",
+        "octany-php"
+    ],
+    "homepage": "https://github.com/octany/octany-php",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Emil Sundberg",
+            "email": "emil@snowfire.net",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.4",
+        "kitetail/zttp": "^0.6.0"
+    },
+    "require-dev": {
+
+    },
+    "autoload": {
+        "psr-4": {
+            "Octany\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Octany\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
