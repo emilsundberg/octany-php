@@ -4,7 +4,7 @@ namespace Octany;
 
 class Subscription
 {
-    private OctanyClient $client;
+    private $client;
 
     public function __construct(OctanyClient $client)
     {
