@@ -4,7 +4,7 @@ namespace Octany;
 
 use Exception;
 use Illuminate\Support\Arr;
-use Zttp\Zttp;
+use Illuminate\Support\Facades\Http;
 
 class OctanyClient
 {
@@ -36,7 +36,7 @@ class OctanyClient
         $parameters['locale'] = Arr::get($parameters, 'locale', app()->getLocale());
 
         $this->latestResponse =
-            Zttp::withHeaders([
+            Http::withHeaders([
                 'X-API-Key' => $this->key,
             ])->get($this->url($endpoint), $parameters);
 
@@ -48,7 +48,7 @@ class OctanyClient
         $parameters['locale'] = Arr::get($parameters, 'locale', app()->getLocale());
 
         $this->latestResponse =
-            Zttp::withHeaders([
+            Http::withHeaders([
                 'X-API-Key' => $this->key,
             ])->post($this->url($endpoint), $parameters);
 
@@ -62,9 +62,9 @@ class OctanyClient
 
     protected function response()
     {
-        if (! $this->latestResponse->isOk()) {
+        if (! $this->latestResponse->successful()) {
             throw new Exception(
-                $this->latestResponse->getStatusCode().' – '.$this->latestResponse->getReasonPhrase()
+                $this->latestResponse->status().' – '.$this->latestResponse->serverError()
             );
         }
 
