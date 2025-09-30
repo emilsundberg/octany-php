@@ -5,6 +5,8 @@ namespace Octany;
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Octany\Utils\Curl;
 
 class OctanyClient
 {
@@ -35,10 +37,18 @@ class OctanyClient
     {
         $parameters['locale'] = Arr::get($parameters, 'locale', app()->getLocale());
 
-        $this->latestResponse =
-            Http::withHeaders([
-                'X-API-Key' => $this->key,
-            ])->get($this->url($endpoint), $parameters);
+        $client = Http::withHeaders([
+            'X-API-Key' => $this->key,
+        ])->withOptions([
+            'on_stats' => function ($stats) {
+                if (config('app.debug') && config('octany-php.log.requests')) {
+                    Log::channel(config('octany-php.log.channel'))
+                        ->debug('[HTTP DEBUG] ' . Curl::fromRequest($stats->getRequest()));
+                }
+            },
+        ]);
+
+        $this->latestResponse = $client->get($this->url($endpoint), $parameters);
 
         return $this->response();
     }
