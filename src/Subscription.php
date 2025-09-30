@@ -20,11 +20,7 @@ class Subscription
     {
         $response = $this->client->get('subscriptions', ['filter' => $filters]);
 
-        if ($response['pagination']['count'] === 1) {
-            return $response['data'][0];
-        }
-
-        return null;
+        return $response['data'][0];
     }
 
     public function order($subscriptionId, $amount, $description)
