@@ -43,7 +43,7 @@ class OctanyClient
             'on_stats' => function ($stats) {
                 if (config('app.debug') && config('octany-php.log.requests')) {
                     Log::channel(config('octany-php.log.channel'))
-                        ->debug('[HTTP DEBUG] ' . Curl::fromRequest($stats->getRequest()));
+                        ->debug('[HTTP DEBUG] '.Curl::fromRequest($stats->getRequest()));
                 }
             },
         ]);

@@ -9,7 +9,7 @@ class OctanyServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../../config/octany-php.php',
+            __DIR__.'/../../config/octany-php.php',
             'octany-php'
         );
     }
@@ -17,7 +17,7 @@ class OctanyServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . '/../../config/octany-php.php' => config_path('octany-php.php'),
+            __DIR__.'/../../config/octany-php.php' => config_path('octany-php.php'),
         ], 'config');
     }
 }
