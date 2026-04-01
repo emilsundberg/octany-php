@@ -3,6 +3,7 @@
 namespace Octany;
 
 use Exception;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -59,7 +60,7 @@ class OctanyClient
         return Http::withHeaders([
             'X-API-Key' => $this->key,
         ])->retry(3, function ($attempt, $exception) {
-            if ($exception instanceof \Illuminate\Http\Client\RequestException) {
+            if ($exception instanceof RequestException) {
                 $retryAfter = $exception->response->header('Retry-After');
 
                 if ($retryAfter) {
@@ -69,7 +70,7 @@ class OctanyClient
 
             return $attempt * 1000;
         }, function ($exception) {
-            return $exception instanceof \Illuminate\Http\Client\RequestException
+            return $exception instanceof RequestException
                 && $exception->response->status() === 429;
         })->withOptions([
             'on_stats' => function ($stats) {
