@@ -37,16 +37,7 @@ class OctanyClient
     {
         $parameters['locale'] = Arr::get($parameters, 'locale', app()->getLocale());
 
-        $client = Http::withHeaders([
-            'X-API-Key' => $this->key,
-        ])->withOptions([
-            'on_stats' => function ($stats) {
-                if (config('app.debug') && config('octany-php.log.requests')) {
-                    Log::channel(config('octany-php.log.channel'))
-                        ->debug('[HTTP DEBUG] '.Curl::fromRequest($stats->getRequest()));
-                }
-            },
-        ]);
+        $client = $this->httpClient();
 
         $this->latestResponse = $client->get($this->url($endpoint), $parameters);
 
@@ -57,12 +48,37 @@ class OctanyClient
     {
         $parameters['locale'] = Arr::get($parameters, 'locale', app()->getLocale());
 
-        $this->latestResponse =
-            Http::withHeaders([
-                'X-API-Key' => $this->key,
-            ])->post($this->url($endpoint), $parameters);
+        $this->latestResponse = $this->httpClient()
+            ->post($this->url($endpoint), $parameters);
 
         return $this->response();
+    }
+
+    private function httpClient()
+    {
+        return Http::withHeaders([
+            'X-API-Key' => $this->key,
+        ])->retry(3, function ($attempt, $exception) {
+            if ($exception instanceof \Illuminate\Http\Client\RequestException) {
+                $retryAfter = $exception->response->header('Retry-After');
+
+                if ($retryAfter) {
+                    return (int) $retryAfter * 1000;
+                }
+            }
+
+            return $attempt * 1000;
+        }, function ($exception) {
+            return $exception instanceof \Illuminate\Http\Client\RequestException
+                && $exception->response->status() === 429;
+        })->withOptions([
+            'on_stats' => function ($stats) {
+                if (config('app.debug') && config('octany-php.log.requests')) {
+                    Log::channel(config('octany-php.log.channel'))
+                        ->debug('[HTTP DEBUG] '.Curl::fromRequest($stats->getRequest()));
+                }
+            },
+        ]);
     }
 
     private function url($endpoint)
