@@ -25,11 +25,16 @@ class Subscription
 
     public function order($subscriptionId, $amount, $description, $productId, array $options = [])
     {
-        $this->client->post("subscription/$subscriptionId/order", array_merge([
+        return $this->client->post("subscription/$subscriptionId/order", array_merge([
             'amount'      => $amount,
             'description' => $description,
             'product_id'  => $productId,
         ], $options));
+    }
+
+    public function orders($subscriptionId, array $filters = [])
+    {
+        return $this->client->get("subscription/$subscriptionId/orders", $filters);
     }
 
     public function createFromSubscriptionBillingMethod($subscriptionId, $productId, $options = [])
