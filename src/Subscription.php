@@ -26,9 +26,9 @@ class Subscription
     public function order($subscriptionId, $amount, $description, $productId, array $options = [])
     {
         return $this->client->post("subscription/$subscriptionId/order", array_merge([
-            'amount'      => $amount,
+            'amount' => $amount,
             'description' => $description,
-            'product_id'  => $productId,
+            'product_id' => $productId,
         ], $options));
     }
 
