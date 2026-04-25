@@ -2,6 +2,4 @@
 
 namespace Octany\Exceptions;
 
-class OctanyValidationException extends OctanyException
-{
-}
+class OctanyValidationException extends OctanyException {}

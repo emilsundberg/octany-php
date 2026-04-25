@@ -10,7 +10,7 @@ use Octany\OctanyClient;
  * @method static array get(string $endpoint, array $parameters = [])
  * @method static array post(string $endpoint, array $parameters = [])
  *
- * @see \Octany\OctanyClient
+ * @see OctanyClient
  */
 class Octany extends Facade
 {

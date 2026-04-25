@@ -11,7 +11,7 @@ class OctanyException extends Exception
 
     protected $responseBody;
 
-    public function __construct($message = '', $statusCode = 0, $responseBody = null, Throwable $previous = null)
+    public function __construct($message = '', $statusCode = 0, $responseBody = null, ?Throwable $previous = null)
     {
         parent::__construct($message, $statusCode, $previous);
 

@@ -2,6 +2,4 @@
 
 namespace Octany\Exceptions;
 
-class OctanyRateLimitException extends OctanyException
-{
-}
+class OctanyRateLimitException extends OctanyException {}

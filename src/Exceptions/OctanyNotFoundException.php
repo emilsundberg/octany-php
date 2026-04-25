@@ -2,6 +2,4 @@
 
 namespace Octany\Exceptions;
 
-class OctanyNotFoundException extends OctanyException
-{
-}
+class OctanyNotFoundException extends OctanyException {}

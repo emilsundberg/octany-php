@@ -2,6 +2,4 @@
 
 namespace Octany\Exceptions;
 
-class OctanyInvalidSignatureException extends OctanyException
-{
-}
+class OctanyInvalidSignatureException extends OctanyException {}
