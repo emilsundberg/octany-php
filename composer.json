@@ -44,7 +44,10 @@
         "laravel": {
             "providers": [
                 "Octany\\Providers\\OctanyServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "Octany": "Octany\\Facades\\Octany"
+            }
         }
     },
     "minimum-stability": "dev",

@@ -2,11 +2,15 @@
 
 namespace Octany;
 
-use Exception;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Octany\Exceptions\OctanyAuthenticationException;
+use Octany\Exceptions\OctanyException;
+use Octany\Exceptions\OctanyNotFoundException;
+use Octany\Exceptions\OctanyRateLimitException;
+use Octany\Exceptions\OctanyValidationException;
 use Octany\Utils\Curl;
 
 class OctanyClient
@@ -19,6 +23,8 @@ class OctanyClient
 
     private $latestResponse;
 
+    private $httpOptions = [];
+
     public function __construct($accountId, $key, $options = [])
     {
         $this->accountId = $accountId;
@@ -27,6 +33,8 @@ class OctanyClient
         if ($domain = Arr::get($options, 'domain')) {
             $this->baseUrl = "$domain/api";
         }
+
+        $this->httpOptions = Arr::get($options, 'http_options', []);
     }
 
     public function subscriptions()
@@ -55,8 +63,17 @@ class OctanyClient
         return $this->response();
     }
 
-    private function httpClient()
+    protected function httpClient()
     {
+        $options = array_merge($this->httpOptions, [
+            'on_stats' => function ($stats) {
+                if (config('app.debug') && config('octany-php.log.requests')) {
+                    Log::channel(config('octany-php.log.channel'))
+                        ->debug('[HTTP DEBUG] '.Curl::fromRequest($stats->getRequest()));
+                }
+            },
+        ]);
+
         return Http::withHeaders([
             'X-API-Key' => $this->key,
         ])->retry(3, function ($attempt, $exception) {
@@ -72,14 +89,7 @@ class OctanyClient
         }, function ($exception) {
             return $exception instanceof RequestException
                 && $exception->response->status() === 429;
-        })->withOptions([
-            'on_stats' => function ($stats) {
-                if (config('app.debug') && config('octany-php.log.requests')) {
-                    Log::channel(config('octany-php.log.channel'))
-                        ->debug('[HTTP DEBUG] '.Curl::fromRequest($stats->getRequest()));
-                }
-            },
-        ]);
+        })->withOptions($options);
     }
 
     private function url($endpoint)
@@ -90,11 +100,35 @@ class OctanyClient
     protected function response()
     {
         if (! $this->latestResponse->successful()) {
-            throw new Exception(
-                $this->latestResponse->status().' – '.$this->latestResponse->serverError()
+            throw $this->makeException(
+                $this->latestResponse->status(),
+                $this->latestResponse->body()
             );
         }
 
         return $this->latestResponse->json();
+    }
+
+    protected function makeException($status, $body)
+    {
+        $message = "Octany API error ($status): $body";
+
+        if ($status === 401 || $status === 403) {
+            return new OctanyAuthenticationException($message, $status, $body);
+        }
+
+        if ($status === 404) {
+            return new OctanyNotFoundException($message, $status, $body);
+        }
+
+        if ($status === 422) {
+            return new OctanyValidationException($message, $status, $body);
+        }
+
+        if ($status === 429) {
+            return new OctanyRateLimitException($message, $status, $body);
+        }
+
+        return new OctanyException($message, $status, $body);
     }
 }
